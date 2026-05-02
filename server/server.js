@@ -13,7 +13,8 @@ const PORT = process.env.PORT || 3000;
 
 await connectDB()
 
-app.use(express.json())
+app.use(express.json({ limit: '10mb' })); 
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 const allowedOrigins = [
     'http://localhost:5173', 

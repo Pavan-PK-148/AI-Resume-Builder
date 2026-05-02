@@ -2,8 +2,11 @@ import { Briefcase, Plus, Sparkles, Trash2 } from 'lucide-react'
 import React from 'react'
 import toast from 'react-hot-toast';
 import api from '../configs/api'; // Ensure this path is correct
+import { useState } from 'react';
 
 const ExperienceForm = ({ data, onChange }) => {
+
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   const addExperience = () => {
     const newExperience = {
@@ -32,27 +35,29 @@ const ExperienceForm = ({ data, onChange }) => {
     const currentDescription = data[index].description;
     
     if (!currentDescription || currentDescription.length < 10) {
-      return toast.error("Write a few words about your role first!");
+      return toast.error("Write a bit more before enhancing!");
     }
 
-    const toastId = toast.loading("AI is rewriting your achievements...");
+    const toastId = toast.loading("AI is polishing your text...");
     try {
-      const token = localStorage.getItem('token');
-      // Note: Make sure your backend route is '/api/ai/enhance-job-desc'
       const { data: res } = await api.post('/api/ai/enhance-job-desc', 
-        { userContent: currentDescription },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { userContent: currentDescription }
+        // No need to manually add headers if your 'api' (axios instance) handles it
       );
 
       if (res.enhancedContent) {
         const updated = [...data];
         updated[index].description = res.enhancedContent;
         onChange(updated);
-        toast.success("Optimized for ATS!", { id: toastId });
+        toast.success("ATS Optimized!", { id: toastId });
       }
     } catch (error) {
       console.error(error);
-      toast.error("AI service is busy. Try again.", { id: toastId });
+      const errorMsg = error.response?.status === 429 
+        ? "Rate limit reached. Wait 60 seconds." 
+        : "Optimization failed. Try again.";
+      
+      toast.error(errorMsg, { id: toastId });
     }
   };
 

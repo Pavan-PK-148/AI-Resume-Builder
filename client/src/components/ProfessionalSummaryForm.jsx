@@ -6,30 +6,39 @@ import api from '../configs/api';
 const ProfessionalSummaryForm = ({data, onChange}) => {
 
   const handleEnhance = async () => {
-  if (!data || data.length < 10) {
+  // Ensure 'data' is a string and has enough length
+  // If 'data' is an object from your form, use 'data.summary' or similar
+  const textToEnhance = typeof data === 'string' ? data : data?.summary;
+
+  if (!textToEnhance || textToEnhance.length < 10) {
     return toast.error("Please write a bit more before enhancing!");
   }
 
   const toastId = toast.loading("AI is polishing your summary...");
   
   try {
-    // 1. Get the token from localStorage
     const token = localStorage.getItem('token');
 
-    // 2. Pass the token in the headers of the POST request
     const { data: res } = await api.post('/api/ai/enhance-pro-sum', 
-      { userContent: data }, 
-      { headers: { Authorization: `Bearer ${token}` } }
+      { userContent: textToEnhance }, // Sent as 'userContent' to match backend
+      { 
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        } 
+      }
     );
     
-    // 3. Update the UI with the AI-generated content
     if (res.enhancedContent) {
+      // onChange updates the parent state/form
       onChange(res.enhancedContent);
       toast.success("Summary enhanced!", { id: toastId });
+    } else {
+      throw new Error("No content received from AI");
     }
   } catch (error) {
     console.error("AI Enhance Error:", error);
-    // 4. Show a more specific error message if available
+    
+    // Catching the 400 or 500 errors from the backend
     const errorMsg = error.response?.data?.message || "AI service is busy. Try again later.";
     toast.error(errorMsg, { id: toastId });
   }

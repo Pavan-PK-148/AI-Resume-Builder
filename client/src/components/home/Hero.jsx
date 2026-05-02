@@ -40,7 +40,7 @@ const Hero = () => {
                 </div>
                 
                 <div className="hidden md:flex items-center gap-8 font-medium text-slate-600">
-                    <a href="#features" className="hover:text-green-600 transition-colors">Templates</a>
+                    <a href="/templates" className="hover:text-green-600 transition-colors">Templates</a>
                     <Link to="/about" className="hover:text-green-600 transition-colors">About</Link>
                 </div>
 
@@ -80,7 +80,7 @@ const Hero = () => {
                         <Link to="/app?state=register" className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-lg shadow-xl shadow-green-100 transition-all hover:-translate-y-1">
                             Get Started Free
                         </Link>
-                        <button className="px-8 py-4 bg-white border border-slate-200 hover:border-green-600 rounded-xl font-bold text-lg transition-all">
+                        <button onClick={()=>navigate('/templates')} className="px-8 py-4 bg-white border border-slate-200 hover:border-green-600 rounded-xl font-bold text-lg transition-all">
                             View Templates
                         </button>
                     </div>

@@ -1,4 +1,4 @@
-import { FilePenLineIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, LayoutDashboard, Clock, FileText, Sparkles, BookOpen, CheckCircle2, ArrowRight,ChevronLeft, ChevronRight, Target } from 'lucide-react'
+import { FilePenLineIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon, XIcon, LayoutDashboard, Clock, FileText, Sparkles, BookOpen, CheckCircle2, ArrowRight,ChevronLeft, ChevronRight, Target,BarChart3 } from 'lucide-react'
 import React, { useState, useEffect,useRef } from 'react'
 import { dummyResumeData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
@@ -11,6 +11,7 @@ import template3 from "../assets/template3.jpeg";
 import template4 from "../assets/template4.jpeg";
 import template5 from "../assets/template5.jpeg";
 import Footer from '../components/home/Footer'
+import ATSScanner from '../components/ATSScanner';
 
 const Dashboard = () => {
   const { user, token } = useSelector(state => state.auth)
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [resume, setResume] = useState(null)
   const [editResumeId, setEditResumeId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showScanner, setShowScanner] = useState(false);
   
   const navigate = useNavigate()
 
@@ -72,24 +74,47 @@ const scroll = (direction) => {
   }
 
   const uploadResume = async (event) => {
-    event.preventDefault();
-    if (!resume) return toast.error("Select a PDF file");
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('resumeFile', resume);
-    try {
-      const { data } = await api.post('/api/resumes/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
-      });
-      if (data.success) {
-        setAllResumes([...allResumes, data.resume]);
-        setShowUploadResume(false);
-        setTitle('');
-        setResume(null);
-        toast.success("Uploaded successfully");
+  event.preventDefault();
+  
+  if (!resume) return toast.error("Select a PDF file");
+  if (!title) return toast.error("Please enter a name for this resume");
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('resumeFile', resume); // Ensure this matches your backend 'upload.single' key
+
+  try {
+    setIsLoading(true); // Show a loader
+    const loadingToast = toast.loading("AI is analyzing your PDF...");
+
+    // Call the AI extraction endpoint we created earlier
+    const { data } = await api.post('/api/ai/upload-resume', formData, {
+      headers: { 
+        'Content-Type': 'multipart/form-data', 
+        Authorization: `Bearer ${token}` 
       }
-    } catch (error) { toast.error("Upload failed"); }
-  };
+    });
+
+    toast.dismiss(loadingToast);
+
+    if (data.success) {
+      toast.success("AI extraction complete!");
+      // Reset state
+      setShowUploadResume(false);
+      setResume(null);
+      setTitle('');
+      
+      // Redirect directly to the builder with the newly created resume ID
+      navigate(`/app/builder/${data.resumeId}`);
+    }
+  } catch (error) {
+    toast.dismiss();
+    console.error(error);
+    toast.error(error.response?.data?.message || "AI failed to read this PDF");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const editTitle = async (e) => {
     e.preventDefault();
@@ -128,41 +153,60 @@ const scroll = (direction) => {
   useEffect(() => { if (!user) setAllResumes([]); }, [user]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50"> {/* Added flex flex-col */}
-      {/* --- PREMIUM GREEN HERO --- */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* ... Hero Content ... */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wider">
-                <Sparkles size={14} /> AI Powered Builder
-              </div>
-              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                Welcome back, <span className="text-green-600">{user?.name?.split(' ')[0] || 'User'}</span>!
-              </h1>
-              <p className="text-slate-500 text-lg max-w-xl">
-                Ready to land your dream job? Pick up where you left off or start a fresh design.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-green-50 p-5 rounded-2xl border border-green-100 min-w-[140px]">
-                <p className="text-3xl font-black text-green-600">{allResumes.length}</p>
-                <p className="text-sm font-bold text-green-800/60 uppercase">Saved Docs</p>
-              </div>
-              <div className="bg-slate-900 p-5 rounded-2xl min-w-[140px]">
-                <p className="text-white text-sm font-bold opacity-60 uppercase mb-1">Status</p>
-                <div className="flex items-center gap-2 text-white font-bold">
-                  <div className="size-2 rounded-full bg-green-400 animate-pulse"></div>
-                  PRO Access
-                </div>
-              </div>
+    <div className="min-h-screen flex flex-col bg-slate-50">
+ 
+  {/* --- PREMIUM GREEN HERO --- */}
+  <div className="bg-white border-b border-slate-200 shadow-sm">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wider">
+            <Sparkles size={14} /> AI Powered Builder
+          </div>
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+            Welcome back, <span className="text-green-600">{user?.name?.split(' ')[0] || 'User'}</span>!
+          </h1>
+          <p className="text-slate-500 text-lg max-w-xl">
+            Ready to land your dream job? Pick up where you left off or start a fresh design.
+          </p>
+
+          {/* AI ATS Scanner Toggle Button */}
+          <button 
+            onClick={() => setShowScanner(!showScanner)}
+            className={`mt-6 flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all transform active:scale-95 ${
+              showScanner 
+              ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
+              : 'bg-green-600 text-white shadow-lg shadow-green-200 hover:bg-green-700'
+            }`}
+          >
+            {showScanner ? <XIcon size={18} /> : <BarChart3 size={18} />}
+            {showScanner ? "Close Scanner" : "Analyze with ATS Scanner"}
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-green-50 p-5 rounded-2xl border border-green-100 min-w-[140px]">
+            <p className="text-3xl font-black text-green-600">{allResumes.length}</p>
+            <p className="text-sm font-bold text-green-800/60 uppercase">Saved Docs</p>
+          </div>
+          <div className="bg-slate-900 p-5 rounded-2xl min-w-[140px]">
+            <p className="text-white text-sm font-bold opacity-60 uppercase mb-1">Status</p>
+            <div className="flex items-center gap-2 text-white font-bold">
+              <div className="size-2 rounded-full bg-green-400 animate-pulse"></div>
+              PRO Access
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
+  {/* Conditional ATS Scanner Render */}
+  {showScanner && (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+       <ATSScanner />
+    </div>
+  )}
       {/* Main Content Container with flex-grow to push footer down */}
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 w-full">
         
@@ -181,17 +225,12 @@ const scroll = (direction) => {
             </div>
           </button>
 
-          <button 
-  onClick={() => toast('Feature Coming Soon! ✨', {
-    icon: '🚀',
-    style: {
-      borderRadius: '15px',
-      background: '#1e293b',
-      color: '#fff',
-      fontFamily: 'Plus Jakarta Sans, sans-serif',
-      fontWeight: 'bold'
-    },
-  })}
+          {/* Change this part in your Dashboard.jsx */}
+<button 
+  onClick={() => {
+    setShowUploadResume(true);
+    setTitle(''); // Clear title for new upload
+  }}
   className="flex items-center justify-between p-8 rounded-3xl bg-white border border-slate-200 hover:border-green-500 transition-all shadow-sm group"
 >
   <div className="text-left">
@@ -365,21 +404,54 @@ const scroll = (direction) => {
                     <h2 className="text-3xl font-black text-slate-900 mb-2 leading-tight">{editResumeId ? 'Rename' : showUploadResume ? 'Upload PDF' : 'Create New'}</h2>
                     <p className="text-slate-500 mb-8 font-medium">Almost there! Just fill in the details.</p>
                     <form onSubmit={editResumeId ? editTitle : showUploadResume ? uploadResume : createResume} className="space-y-6">
-                        <div>
-                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block">Resume Title</label>
-                            <input autoFocus onChange={(e) => setTitle(e.target.value)} value={title} type="text" placeholder="e.g. My Dream Job Resume" className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-green-500 outline-none transition-all font-bold text-slate-800" required />
-                        </div>
-                        {showUploadResume && (
-                            <div className="relative border-2 border-dashed border-green-200 rounded-2xl p-10 text-center hover:bg-green-50 transition-colors">
-                                <input type="file" id="resume-input" accept=".pdf" hidden onChange={(e) => setResume(e.target.files[0])} />
-                                <label htmlFor="resume-input" className="cursor-pointer">
-                                    <UploadCloud className="mx-auto size-12 text-green-600 mb-3" />
-                                    <p className="text-sm font-black text-slate-700">{resume ? resume.name : "Select your PDF file"}</p>
-                                </label>
-                            </div>
-                        )}
-                        <button type="submit" className="w-full py-5 bg-green-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-green-200 hover:bg-green-700 hover:-translate-y-1 transition-all active:scale-95">{editResumeId ? 'Update Resume' : showUploadResume ? 'Upload Now' : 'Create Resume'}</button>
-                    </form>
+    
+    {/* Title Input: We show this for ALL modes, but change the label */}
+    <div>
+        <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block">
+            {showUploadResume ? 'Resume Name' : 'Resume Title'}
+        </label>
+        <input 
+            autoFocus 
+            onChange={(e) => setTitle(e.target.value)} 
+            value={title} 
+            type="text" 
+            placeholder="e.g. Senior Software Engineer" 
+            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-green-500 outline-none transition-all font-bold text-slate-800" 
+            required 
+        />
+    </div>
+
+    {/* File Dropzone: ONLY show when showUploadResume is true */}
+    {showUploadResume && (
+        <div className={`relative border-2 border-dashed rounded-2xl p-10 text-center transition-all ${resume ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+            <input 
+                type="file" 
+                id="resume-input" 
+                accept=".pdf" 
+                hidden 
+                onChange={(e) => {
+                    setResume(e.target.files[0]);
+                    if(!title && e.target.files[0]) setTitle(e.target.files[0].name.replace('.pdf', ''));
+                }} 
+            />
+            <label htmlFor="resume-input" className="cursor-pointer">
+                <UploadCloudIcon className={`mx-auto size-12 mb-3 ${resume ? 'text-green-600' : 'text-slate-400'}`} />
+                <p className="text-sm font-black text-slate-700">
+                    {resume ? resume.name : "Click to select or drag & drop PDF"}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">PDF format only (Max 5MB)</p>
+            </label>
+        </div>
+    )}
+
+    <button 
+        disabled={isLoading}
+        type="submit" 
+        className="w-full py-5 bg-green-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-green-200 hover:bg-green-700 hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50"
+    >
+        {isLoading ? 'Processing...' : editResumeId ? 'Update Title' : showUploadResume ? 'Start AI Import' : 'Create Resume'}
+    </button>
+</form>
                 </div>
             </div>
           </div>

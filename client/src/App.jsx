@@ -18,6 +18,12 @@ import About from './pages/About'
 import Blog from './pages/Blog'
 import PrivacyAndTerms from './pages/Privacy'
 import Support from './pages/Support'
+import ATSCheckerPage from './pages/ATSCheckerPage'
+import ATSFeature from './pages/ATSFeature'
+import AIRewriter from './pages/AIRewriter'
+import Templates from './pages/Templates'
+import KeywordAnalysis from './pages/KeywordAnalysis'
+import UpdateBanner from './components/home/UpdateModal'
 
 const App = () => {
   const dispatch = useDispatch();
@@ -51,6 +57,7 @@ const App = () => {
   return (
     <div className="selection:bg-green-200">
       <Toaster position="top-center" />
+      <UpdateBanner />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About />}/>
@@ -58,6 +65,11 @@ const App = () => {
           <Route index element={<Dashboard />} />
           <Route path='builder/:resumeId' element={<ResumeBuilder />} />
         </Route>
+        <Route path='/ats-checker' element={<ATSCheckerPage />} />
+        <Route path='/ats' element={<ATSFeature />} />
+        <Route path='/rewriter' element={<AIRewriter />} />
+        <Route path='/templates' element={<Templates />} />
+        <Route path='/analysis' element={<KeywordAnalysis />} />
         <Route path='view/:resumeId' element={<Preview />} />
         <Route path='/blog' element={<Blog />} />
         <Route path='/privacy' element={<PrivacyAndTerms />} />
