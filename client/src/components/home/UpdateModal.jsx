@@ -37,22 +37,22 @@ const UpdateModal = () => {
     }
   ];
 
-  useEffect(() => {
+//   useEffect(() => {
  
-  const timer = setTimeout(() => {
-    setIsOpen(true);
-  }, 1500); // Opens 1.5 seconds after the component mounts
+//   const timer = setTimeout(() => {
+//     setIsOpen(true);
+//   }, 1500); // Opens 1.5 seconds after the component mounts
 
-  return () => clearTimeout(timer);
-}, []);
+//   return () => clearTimeout(timer);
+// }, []);
 
-  // useEffect(() => {
-  //   const hasSeenUpdate = localStorage.getItem('v2_modal_seen');
-  //   if (!hasSeenUpdate) {
-  //     const timer = setTimeout(() => setIsOpen(true), 1500);
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, []);
+  useEffect(() => {
+    const hasSeenUpdate = localStorage.getItem('v2_modal_seen');
+    if (!hasSeenUpdate) {
+      const timer = setTimeout(() => setIsOpen(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
