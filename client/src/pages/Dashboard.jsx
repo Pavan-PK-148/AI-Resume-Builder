@@ -175,8 +175,8 @@ const scroll = (direction) => {
             onClick={() => setShowScanner(!showScanner)}
             className={`mt-6 flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all transform active:scale-95 ${
               showScanner 
-              ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
-              : 'bg-green-600 text-white shadow-lg shadow-green-200 hover:bg-green-700'
+              ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer' 
+              : 'bg-green-600 text-white shadow-lg shadow-green-200 hover:bg-green-700 cursor-pointer'
             }`}
           >
             {showScanner ? <XIcon size={18} /> : <BarChart3 size={18} />}

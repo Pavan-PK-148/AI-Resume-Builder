@@ -9,7 +9,7 @@ export const enhanceProfessionalSummary = async (req, res) => {
         if (!userContent) return res.status(400).json({ message: "Summary is required" });
 
         const response = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-120b",
             messages: [
                 { role: "system", content: "You are a resume expert. Enhance this summary into 2 professional sentences. Return only the enhanced text." },
                 { role: "user", content: userContent }
@@ -30,7 +30,7 @@ export const enhanceJobDescription = async (req, res) => {
         if (!userContent) return res.status(400).json({ message: "Content is required" });
 
         const response = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile", 
+            model: "openai/gpt-oss-120b", 
             messages: [
                 { role: "system", content: "You are a resume expert. Enhance this job description using action verbs. Return ONLY the enhanced text." },
                 { role: "user", content: userContent },
@@ -76,7 +76,7 @@ export const uploadResume = async (req, res) => {
         }`;
 
         const response = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-120b",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userPrompt },
@@ -134,7 +134,7 @@ export const checkATSScore = async (req, res) => {
         `;
 
         const response = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-120b",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userPrompt },
@@ -185,7 +185,7 @@ export const checkATSInstant = async (req, res) => {
         `;
 
         const response = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-120b",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userPrompt },
@@ -246,7 +246,7 @@ export const optimizeResume = async (req, res) => {
         `;
 
         const response = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-120b",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userPrompt },
